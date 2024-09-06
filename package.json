@@ -1,0 +1,38 @@
+{
+  "name": "truth-table",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "cli": "tsx src/cli.ts",
+    "dev": "tsx src/app.ts",
+    "lint": "eslint -c eslint.config.mjs",
+    "build": "rimraf dist && tsc -p ./tsconfig.json && tsc-alias -p ./tsconfig.json"
+  },
+  "keywords": [
+    "table",
+    "truth",
+    "truth-tables",
+    "truth-table",
+    "table-formatter",
+    "truth-table-generator"
+  ],
+  "author": "Ashu11-A",
+  "license": "MIT",
+  "description": "Formatters for truth tables",
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/node": "^22.5.4",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.10",
+    "tsup": "^8.2.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.4.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0"
+  }
+}
