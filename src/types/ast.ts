@@ -15,6 +15,7 @@ export type Base = {
 export type Proposition = {
     type: 'Proposition',
     value: string
+    negatived: boolean,
 }
 
 export type OperationValues = '¬' | '~' | '∧' | '^' | '∨' | '→' | '↔'
@@ -66,6 +67,7 @@ export type Operation = (
 
 export type SubExpression = {
     type: 'SubExpression',
+    negatived: boolean,
     body: Node[]
 }
 

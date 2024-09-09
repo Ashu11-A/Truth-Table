@@ -81,15 +81,4 @@ export class Structure {
     // Caso contrário, retorna false
     return Math.floor(row / alternatingFactor) % 2 === 1
   }
-    
-  /**
-   * Saves the current values of the structure to a file in JSON format.
-   * 
-   * @async
-   * @param {string} path - The path to the file where the JSON content will be saved.
-   * @returns {Promise<void>} A promise that resolves when the file has been successfully saved.
-   */
-  async save(path: string): Promise<void> {
-    await writeFile(path, JSON.stringify(this.values))
-  }
 }
