@@ -1,4 +1,4 @@
-import { lettersAllowed, operationsAllowed, subExpressions } from '@/index.js'
+import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions } from '@/index.js'
 import { Node, OperationKey, OperationValues, Tokanizer } from '@/types/ast.js'
 import { writeFile } from 'fs/promises'
 
@@ -77,6 +77,8 @@ export class AST {
               parenthesesCount++
             } else if (currentToken.value === ')') {
               parenthesesCount--
+            } else if ((index + 1) === tokens.length) {
+              throw new Error(`It was expected that there would be a “)”, in row: ${currentToken.loc.start.line}, column: ${currentToken.loc.start.column}.`)
             }
 
             if (parenthesesCount > 0) {
@@ -110,15 +112,15 @@ export class AST {
   }
 
   getOperationKey (value: OperationValues): OperationKey {
-    return ['¬', '~'].includes(value)
+    return negationExpressions.includes(value)
       ? OperationKey.Negation
-      : ['∧','^'].includes(value)
+      : conjunctionExpressions.includes(value)
         ? OperationKey.Conjunction
-        : ['∨'].includes(value)
+        : disjunctionExpressions.includes(value)
           ? OperationKey.Disjunction
-          : ['→'].includes(value)
+          : conditionalExpressions.includes(value)
             ? OperationKey.Conditional
-            : ['↔'].includes(value)
+            : biconditionalExpressions.includes(value)
               ? OperationKey.Biconditional
               : OperationKey.None
   }
