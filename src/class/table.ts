@@ -50,12 +50,12 @@ export class Table {
    * @returns {string} The CSV representation of the table.
    */
   csv (): string {
-    const header = Object.values(this.structure.variables).join(',')
+    const header = Object.values(this.structure.propositions).join(',')
     let lineContent: string = ''
     const lines: Array<boolean>[] = []
 
-    for (const [index, element] of Object.entries(this.structure.variables)) {
-      for (const variable of this.structure.values) {
+    for (const [index, element] of Object.entries(this.structure.propositions)) {
+      for (const variable of this.structure.structure) {
         if (element === variable.element) lines[Number(index)] = [...lines?.[Number(index)] ?? [], variable.value]
       }
     }
