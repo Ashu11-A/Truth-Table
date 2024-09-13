@@ -1,5 +1,4 @@
 import { TerminalArg } from '@/types/terminal.js'
-import c from 'chalk'
 
 export class Terminal {
   static args: TerminalArg[] = []
@@ -45,7 +44,7 @@ export class Terminal {
 
   static help () {
     const output: string[] = []
-    output.push(`Usage: ${c.yellowBright('ttt')} ${c.magentaBright('[options]')}\n`)
+    output.push('Usage: ttt [options]\n')
     output.push('  Options:\n')
 
     const maxAliasLength = Math.max(...Terminal.args.map(arg => arg.alias.join(', ').length))
@@ -57,7 +56,7 @@ export class Terminal {
       const aliasPadding = ' '.repeat(maxAliasLength - alias.length)
       const commandPadding = ' '.repeat(maxCommandLength - command.length)
 
-      output.push(`   ${c.blueBright(alias)}${aliasPadding} ${c.white(command)}${commandPadding} ${c.green(arg.description)}`)
+      output.push(`   ${alias}${aliasPadding} ${command}${commandPadding} ${arg.description}`)
     }
     return output.join('\n')
   }
