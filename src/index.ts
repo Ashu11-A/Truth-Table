@@ -8,6 +8,7 @@ export const conjunctionExpressions = ['^', '∧']
 export const disjunctionExpressions = ['∨', '˅']
 export const conditionalExpressions = ['→', '->']
 export const biconditionalExpressions = ['↔', '<>', '<->']
-
-export const operationsAllowed = [...negationExpressions, ...conjunctionExpressions, ...disjunctionExpressions, ...conditionalExpressions, ...biconditionalExpressions]
+export const xorExpressions = ['⊕']
 export const subExpressions = ['(', ')']
+
+export const operationsAllowed = [...negationExpressions, ...conjunctionExpressions, ...disjunctionExpressions, ...conditionalExpressions, ...biconditionalExpressions, ...xorExpressions]

@@ -1,4 +1,4 @@
-import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions } from '@/index.js'
+import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '@/index.js'
 import { Node, OperationKey, OperationValues, Tokanizer } from '@/types/ast.js'
 import { writeFile } from 'fs/promises'
 import { ErrorType, UnexpectedError } from './error.js'
@@ -49,7 +49,7 @@ export class AST {
            * Caso seja uma negativa de uma Preposição, ele deve ser pulado,
            * já que ele será anexado a Preposição com o elemento negatived
            */
-          if (['~'].includes(value)) {
+          if (negationExpressions.includes(value)) {
             index++
             continue
           }
@@ -125,11 +125,13 @@ export class AST {
             ? OperationKey.Conditional
             : biconditionalExpressions.includes(value)
               ? OperationKey.Biconditional
-              : OperationKey.None
+              : xorExpressions.includes(value)
+                ? OperationKey.XOR
+                : OperationKey.None
   }
 
   getNegatived (tokens: Tokanizer[], index: number) {
-    return ['~'].includes(tokens[index - 1]?.value)
+    return negationExpressions.includes(tokens[index - 1]?.value)
   }
 
   /**

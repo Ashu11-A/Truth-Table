@@ -98,7 +98,7 @@ export class Structure {
      * @param {number | undefined} defaultIndex - O índice do próximo nó a ser recuperado.
      * @returns {Node | undefined} - O próximo nó ou undefined se não houver próximo nó.
      */
-    const getNextNode = (defaultIndex?: number): Node | undefined => {
+    const getNode = (defaultIndex?: number): Node | undefined => {
       const indexx = defaultIndex ?? index
       return expression[indexx]
     }
@@ -123,7 +123,7 @@ export class Structure {
       let currentOperation: OperationKey | undefined = undefined
       
       while (index < expression.length) {
-        const node = getNextNode()
+        const node = getNode()
         if (!node) break
 
         switch (node.type) {
@@ -192,6 +192,8 @@ export class Structure {
     case OperationKey.Biconditional: {
       return propositions.reduce((acc, current) => acc === current)
     }
+    case OperationKey.XOR:
+      return propositions.reduce((acc, current) =>  acc !== current)
     case OperationKey.None:
       return false
     }

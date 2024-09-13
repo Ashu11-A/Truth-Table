@@ -8,7 +8,7 @@ export type SourceLocation = {
     end: Position
 }
 
-export type Base = {
+export type BaseAST = {
     loc: SourceLocation
 }
 
@@ -18,7 +18,7 @@ export type Proposition = {
     negatived: boolean,
 }
 
-export type OperationValues = '¬' | '~' | '∧' | '^' | '∨' | '→' | '↔'
+export type OperationValues = '¬' | '~' | '∧' | '^' | '∨' | '→' | '↔' | '⊕'
 
 export enum OperationKey {
     Negation = 'Negation',
@@ -26,43 +26,14 @@ export enum OperationKey {
     Disjunction = 'Disjunction',
     Conditional = 'Conditional',
     Biconditional = 'Biconditional',
+    XOR = 'XOR',
     None = 'None'
 }
 
-export type OperationNegation = {
-    key: OperationKey.Negation | 'Negation'
-}
-
-export type OperationConjunction = {
-    key: OperationKey.Conjunction | 'Conjunction'
-}
-
-export type OperationDisjunction = {
-    key: OperationKey.Disjunction | 'Disjunction'
-}
-
-export type OperationConditional = {
-    key: OperationKey.Conditional | 'Conditional'
-}
-
-export type OperationBiconditional = {
-    key: OperationKey.Biconditional | 'Biconditional'
-}
-
-export type OperationNone = {
-    key: OperationKey.None | 'None'
-}
-
-export type Operation = (
-    | OperationNegation
-    | OperationConjunction
-    | OperationDisjunction
-    | OperationConditional
-    | OperationBiconditional
-    | OperationNone
-) & {
-    value: string,
-    type: 'Operation'
+export interface Operation extends BaseAST {
+    key: OperationKey;
+    value: string;
+    type: 'Operation';
 }
 
 export type SubExpression = {
@@ -71,13 +42,9 @@ export type SubExpression = {
     body: Node[]
 }
 
-export type ErrorSintaxe = SourceLocation & {
-    message: string
-}
-
 export type Tokanizer = {
     value: OperationValues | string,
     loc: SourceLocation
 }
 
-export type Node = (Proposition | Operation | SubExpression) & Base
+export type Node = (Proposition | Operation | SubExpression) & BaseAST
