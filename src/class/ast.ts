@@ -1,6 +1,7 @@
 import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions } from '@/index.js'
 import { Node, OperationKey, OperationValues, Tokanizer } from '@/types/ast.js'
 import { writeFile } from 'fs/promises'
+import { ErrorType, UnexpectedError } from './error.js'
 
 export class AST {
   public readonly tokens: Tokanizer [] = []
@@ -18,7 +19,7 @@ export class AST {
    * 
    * @throws {Error} Se houver tokens inválidos, a função `validation` irá lançar um erro com a linha e a coluna do token inválido.
    */
-  parse(tokens?: Tokanizer[]): Node[] {
+  parse(tokens?: Tokanizer[]): Node[] | ErrorType {
     tokens = tokens ?? this.tokens
     this.validation(tokens)
 
@@ -106,7 +107,9 @@ export class AST {
       return ast
     }
     const ast = process(tokens)
-    this.validationAST(ast)
+    const error = this.validationAST(ast)
+    if (error !== undefined) return error
+
     this.ast = ast
     return ast
   }
@@ -187,8 +190,8 @@ export class AST {
     }
   }
 
-  validationAST(ast: Node[]): void {
-    const process = (expressions: Node[]): void => {
+  validationAST(ast: Node[]): ErrorType | undefined {
+    const process = (expressions: Node[]): ErrorType | undefined => {
       let index = 0
 
       while (index < expressions.length) {
@@ -197,30 +200,81 @@ export class AST {
 
         switch (element.type) {
         case 'Proposition': {
-          if (nextElement !== undefined && nextElement?.type !== 'Operation') throw new Error(`The next element was expected to be an Operation, but it got one: ${nextElement.type}`)
+          if (nextElement !== undefined && nextElement?.type !== 'Operation') return new UnexpectedError({
+            origin: element.type,
+            expected: ['Operation'],
+            unexpected: nextElement.type,
+            loc: nextElement.loc
+          }).toJSON()
           index++
 
           break
         }
         case 'Operation': {
-          if (nextElement !== undefined && !['Proposition', 'SubExpression'].includes(nextElement?.type)) throw new Error(`The next element was expected to be a Proposition or SubExpression, but it got one: ${nextElement.type}`)
+          /**
+           * Só ocorre quando se é usado um elemento não permidido, tipo uma caracter especial ou letra não categorizada
+           * Error: P ^ =
+           * Correct: P ^ Q
+           */
+          if (element.key === 'None') return new UnexpectedError({
+            origin: element.key,
+            expected: ['Proposition', 'SubExpression'],
+            unexpected: nextElement.type,
+            loc: nextElement.loc
+          }).toJSON()
+
+          /**
+           * Se após um elemento Operation não for um dos elementos Proposition ou SubExpression
+           * Error: P ^ ^
+           * Correct: P ^ Q
+           */
+          if (nextElement !== undefined && !['Proposition', 'SubExpression'].includes(nextElement?.type)) return new UnexpectedError({
+            origin: nextElement.type,
+            expected: ['Proposition', 'SubExpression'],
+            unexpected: nextElement.type,
+            loc: nextElement.loc
+          }).toJSON()
+
+          /**
+           * Caso após um elemento Operation não houver nenhum outro elemento
+           * Error: P ^ Q ^
+           * Correct: P ^ Q ^ R
+           */
+          if (nextElement === undefined) return new UnexpectedError({
+            origin: element.type,
+            expected: ['Proposition', 'SubExpression'],
+            unexpected: 'None',
+            loc: element.loc
+          }).toJSON()
+
           index++
           
           break
         }
         case 'SubExpression': {
           process(element.body)
-          if (nextElement !== undefined && !['Operation'].includes(nextElement?.type)) throw new Error(`The next element was expected to be an Operation, but it got one: ${nextElement?.type}`)
+          /**
+           * Se após a declaração de um conjunto, houver algo, isso deve ser um operador.
+           * Error: (P ^ Q) P
+           * Correct: (P ^ Q) ^ P
+           */
+          if (nextElement !== undefined && !['Operation'].includes(nextElement?.type)) return new UnexpectedError({
+            origin: element.type,
+            expected: ['Operation'],
+            unexpected: nextElement.type,
+            loc: nextElement.loc
+          }).toJSON()
           index++
 
           break
         }
         }
-
       }
+      return
     }
-    process(ast)
+    return process(ast)
   }
+
   /**
    * Saves the current AST to a file in JSON format.
    * 
@@ -231,5 +285,10 @@ export class AST {
   async save(path: string): Promise<void> {
     if (this.ast === undefined) throw new Error('AST is undefined, use the parse function before save!')
     await writeFile(path, JSON.stringify(this.ast, null, 2))
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static isUnexpectedError(object: any): object is ErrorType {
+    return object['code'] === 'Unexpected'
   }
 }

@@ -7,7 +7,12 @@ const parser = new AST(input)
 const ast = parser.parse()
 // await parser.save('ast.json')
 
-console.log(ast)
+if (AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
 
 const structure = new Structure(ast).generate()
-new Table({ structure, type: 'csv', display: 'boolean' }).create('table.csv')
+
+new Table({
+  structure,
+  type: 'csv',
+  display: 'boolean'
+}).create('table.csv')

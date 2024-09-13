@@ -3,10 +3,11 @@
 import '@/index.js'
 import { Terminal } from './class/terminal.js'
 import { Structure, Table, TableType } from '@/index.js'
+import { AST } from './class/ast.js'
 
 const args = process.argv.slice(2).map((arg) => arg.replace('--', ''))
 const TableSettings: TableType = { type: 'csv', display: 'boolean' }
-let filePath: string = 'table.csv'
+let filePath: string | undefined
 
 new Terminal([
   {
@@ -59,8 +60,13 @@ new Terminal([
     hasString: true,
     async function(content) {
       if (content === undefined) throw new Error('Preposition not defined!')
-      const structure = new Structure({ input: content }).generate()
-      await new Table({ structure, ...TableSettings }).create(filePath)
+      const ast = new AST(content).parse()
+
+      if(AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
+
+      const structure = new Structure(ast).generate()
+      console.log(structure)
+      if (filePath) await new Table({ structure, ...TableSettings }).create(filePath)
     },
   }
 ]).run(args)
