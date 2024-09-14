@@ -1,32 +1,26 @@
 {
-  "compilerOptions":{
-     "target":"ESNext",
-     "lib":[
-        "ESNext",
-        "DOM"
-     ],
-     "module":"NodeNext",
-     "rootDir":".",
-     "moduleResolution":"NodeNext",
-     "baseUrl":".",
-     "paths":{
-        "@/*":[
-           "./src/*"
-        ]
-     },
-     "declaration": true,
-     "resolveJsonModule": true,
-     "outDir": "./dist",
-     "removeComments": false,
-     "esModuleInterop": true,
-     "forceConsistentCasingInFileNames": true,
-     "strict": true,
-     "noImplicitAny": true,
-     "noUnusedLocals": false,
-     "noUnusedParameters": true,
-     "noImplicitReturns": true,
-     "skipLibCheck": true
-  },
-  "include":["src"],
-  "exclude":["node_modules"]
+    "compilerOptions": {
+        "target":"ESNext",
+        "lib":[
+           "ESNext",
+           "DOM"
+        ],
+        "module":"NodeNext",
+        "moduleResolution":"NodeNext",
+        
+        "resolveJsonModule": true,
+        "outDir": "./dist",
+        "removeComments": false,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "skipLibCheck": true
+    },
+    "compileOnSave": false,
+    "exclude": ["node_modules", "dist"],
+    "include": ["src"]
 }

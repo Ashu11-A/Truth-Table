@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import '@/index.js'
+import './index.js'
 import { Terminal } from './class/terminal.js'
-import { Structure, Table, TableType } from '@/index.js'
+import { Structure, Table, TableType } from './index.js'
 import { AST } from './class/ast.js'
 
 const args = process.argv.slice(2).map((arg) => arg.replace('--', ''))

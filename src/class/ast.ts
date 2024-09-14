@@ -1,5 +1,5 @@
-import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '@/index.js'
-import { Node, OperationKey, OperationValues, Tokanizer } from '@/types/ast.js'
+import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '../index.js'
+import { Node, OperationKey, OperationValues, Tokanizer } from '../types/ast.js'
 import { writeFile } from 'fs/promises'
 import { ErrorType, UnexpectedError } from './error.js'
 

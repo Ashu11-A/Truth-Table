@@ -1,5 +1,6 @@
-import { Node, OperationKey } from '@/types/ast.js'
-import { StructureJson } from '@/types/structure.js'
+import { writeFile } from 'fs/promises'
+import { Node, OperationKey } from '../types/ast.js'
+import { StructureJson } from '../types/structure.js'
 
 /**
  * Represents a logical structure that can parse input expressions
@@ -242,5 +243,17 @@ export class Structure {
     // Se a linha atual estiver dentro do grupo "true" para essa variável, retorna true
     // Caso contrário, retorna false
     return Math.floor(row / alternatingFactor) % 2 === 1
+  }
+
+  /**
+   * Saves the generated structure in a file in JSON format
+   * 
+   * @async
+   * @param {string} path - The path to the file where the JSON content will be saved.
+   * @returns {Promise<void>} A promise that resolves when the file has been successfully saved.
+   */
+  async save(path: string): Promise<void> {
+    if (this.structure === undefined) throw new Error('Structure is undefined, use the generate function before save!')
+    await writeFile(path, JSON.stringify(this.structure, null, 2))
   }
 }

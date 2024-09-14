@@ -1,4 +1,4 @@
-import { BaseAST } from '@/types/ast.js'
+import { BaseAST } from '../types/ast.js'
 
 export type ErrorType = BaseAST & {
   name: string

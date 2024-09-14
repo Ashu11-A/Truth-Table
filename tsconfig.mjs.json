@@ -1,0 +1,14 @@
+{
+   "extends": "./tsconfig.json",
+   "compilerOptions": {
+      "target":"ESNext",
+      "lib":[
+         "ESNext",
+         "DOM"
+      ],
+      "module":"NodeNext",
+      "moduleResolution":"NodeNext",
+      "outDir": "dist/mjs"
+   },
+   "exclude": ["src/app.ts"]
+}

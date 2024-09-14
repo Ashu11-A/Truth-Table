@@ -1,4 +1,4 @@
-import { TableType } from '@/types/table.js'
+import { TableType } from '../types/table.js'
 import { writeFile } from 'fs/promises'
 import { Structure } from './structure.js'
 

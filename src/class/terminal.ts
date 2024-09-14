@@ -1,4 +1,4 @@
-import { TerminalArg } from '@/types/terminal.js'
+import { TerminalArg } from '../types/terminal.js'
 
 export class Terminal {
   static args: TerminalArg[] = []
