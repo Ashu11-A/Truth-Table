@@ -1,13 +1,20 @@
-import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '../index.js'
-import { Node, OperationKey, OperationValues, Tokanizer } from '../types/ast.js'
 import { writeFile } from 'fs/promises'
-import { ErrorType, UnexpectedError } from './error.js'
+import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '../index.js'
+import { ErrorType, UnexpectedError } from '../lib/error.js'
+import { Node, OperationKey, OperationValues, Tokenizer } from '../types/ast.js'
+import { Method } from './astMethods.js'
 
 export class AST {
-  public readonly tokens: Tokanizer [] = []
+  public readonly tokens: Tokenizer [] = []
   public ast: Node[] | undefined
+  public parseIndex = 0
   constructor(public input: string) {
     this.tokens = this.tokenize(this.input)
+  }
+
+  async loader(): Promise<AST> {
+    await Method.register()
+    return this
   }
   
   /**
@@ -19,94 +26,59 @@ export class AST {
    * 
    * @throws {Error} Se houver tokens inválidos, a função `validation` irá lançar um erro com a linha e a coluna do token inválido.
    */
-  parse(tokens?: Tokanizer[]): Node[] | ErrorType {
+  parse(tokens?: Tokenizer[], index?: number): Node[] | ErrorType {
     tokens = tokens ?? this.tokens
+    let actualIndex = index ?? this.parseIndex
     this.validation(tokens)
 
-    const process = (tokens: Tokanizer[]): Node[] => {
-      const ast: Node[] = []
-      let index = 0
+    const ast: Node[] = []
 
-      while (index < tokens.length) {
-        const { value, loc } = tokens[index]
+    while (actualIndex < tokens.length) {
+      const { value, loc } = tokens[actualIndex]
 
-        switch (true) {
-        case lettersAllowed.includes(value): {
-          ast.push({
-            value: value,
-            type: 'Proposition',
-            negatived: this.getNegatived(tokens, index),
-            loc: {
-              start: loc.start,
-              end: loc.end
-            }
-          })
-          index++
-          break
-        }
-        case operationsAllowed.includes(value): {
-          /**
-           * Caso seja uma negativa de uma Preposição, ele deve ser pulado,
-           * já que ele será anexado a Preposição com o elemento negatived
-           */
-          if (negationExpressions.includes(value)) {
-            index++
-            continue
-          }
-          ast.push({
-            type: 'Operation',
-            value,
-            key: this.getOperationKey(value as OperationValues),
-            loc: {
-              start: loc.start,
-              end: loc.end
-            }
-          })
-          index++
-          break
-        }
-        case value === '(': {
-          const indexSet = index
-          const subExprTokens: Tokanizer[] = []
-          let parenthesesCount = 1
-          index++ // Pular o elemento '(' para que não fique em loop infinito
-          
-          // Extrai todo que está dentro de ()
-          while (index < tokens.length && parenthesesCount > 0) {
-            const currentToken = tokens[index]
-            if (currentToken.value === '(') {
-              parenthesesCount++
-            } else if (currentToken.value === ')') {
-              parenthesesCount--
-            } else if ((index + 1) === tokens.length) {
-              throw new Error(`It was expected that there would be a “)”, in row: ${currentToken.loc.start.line}, column: ${currentToken.loc.start.column}.`)
-            }
+      switch (true) {
+      case lettersAllowed.includes(value): {
+        const result = Method?.execute?.({ type: 'Proposition', ast: this, index: actualIndex, tokens })
+        if (result === undefined) throw new Error('The Proposition method is not instantiated')
+        if (AST.isUnexpectedError(result)) return result
 
-            if (parenthesesCount > 0) {
-              subExprTokens.push(currentToken)
-            }
-            index++
-          }
-
-          ast.push({
-            type: 'SubExpression',
-            body: process(subExprTokens),
-            negatived: this.getNegatived(tokens, indexSet),
-            loc: {
-              start: loc.start,
-              end: tokens[index - 1].loc.end // End of the closing parenthesis
-            }
-          })
-          break
-        }
-        default: {
-          throw new Error(`In the row: ${loc.start.line} Column: ${loc.start.column} It was not possible to determine what the value would be: ${value}`)
-        }
-        }
+        ast.push(result)
+        actualIndex++
+        this.parseIndex++
+        break
       }
-      return ast
+      case operationsAllowed.includes(value): {
+        // Caso seja uma negativa de uma Preposição, ele deve ser pulado,
+        // já que ele será anexado à Preposição com o elemento negado
+        if (negationExpressions.includes(value)) {
+          actualIndex++
+          this.parseIndex++
+          continue
+        }
+        const result = Method?.execute?.({ type: 'Operation', ast: this, index: actualIndex, tokens })
+        if (result === undefined) throw new Error('The Operation method is not instantiated')
+        if (AST.isUnexpectedError(result)) return result
+
+        ast.push(result)
+        actualIndex++
+        this.parseIndex++
+        break
+      }
+      case value === '(': {
+        const result = Method?.execute?.({ type: 'SubExpression', ast: this, index: actualIndex, tokens })
+        if (result === undefined) throw new Error('The SubExpression method is not instantiated')
+        if (AST.isUnexpectedError(result)) return result
+
+        ast.push(result)
+        actualIndex = ++this.parseIndex
+        break
+      }
+      default: {
+        throw new Error(`In the row: ${loc.start.line} Column: ${loc.start.column} It was not possible to determine what the value would be: ${value}`)
+      }
+      }
     }
-    const ast = process(tokens)
+
     const error = this.validationAST(ast)
     if (error !== undefined) return error
 
@@ -130,7 +102,7 @@ export class AST {
                 : OperationKey.None
   }
 
-  getNegatived (tokens: Tokanizer[], index: number) {
+  getNegatived (tokens: Tokenizer[], index: number) {
     return negationExpressions.includes(tokens[index - 1]?.value)
   }
 
@@ -141,12 +113,12 @@ export class AST {
    * @param {?string} [input]  string de entrada contendo a expressão ou dados a serem tokenizados. Se não for fornecida,
    * a função usará o valor de `this.input` como entrada.
    * 
-   * @returns {Tokanizer[]} Uma lista de objetos `Tokenizer`, onde cada objeto representa um token com o valor e sua localização
+   * @returns {Tokenizer[]} Uma lista de objetos `Tokenizer`, onde cada objeto representa um token com o valor e sua localização
    * (linha e coluna) na string de entrada.
    */
-  tokenize(input?: string): Tokanizer[] {
+  tokenize(input?: string): Tokenizer[] {
     const lines = (input ?? this.input).split('\n')
-    const tokens: Tokanizer[] = []
+    const tokens: Tokenizer[] = []
 
     for (const [line, content] of Object.entries(lines)) {
       const lineNumber = Number(line) + 1
@@ -184,7 +156,7 @@ export class AST {
     * lança um erro detalhando a linha e a coluna do valor inválido.
     * 
     */
-  validation(tokens: Tokanizer[]): void {
+  validation(tokens: Tokenizer[]): void {
     for (const { loc, value } of tokens) {
       if (![...lettersAllowed, ...operationsAllowed, ...subExpressions].includes(value)) {
         throw new Error(`In the row: ${loc.start.line} Column: ${loc.start.column} It was not possible to determine what the value would be: ${value}`)

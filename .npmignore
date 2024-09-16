@@ -8,11 +8,14 @@ CODE_OF_CONDUCT.md
 .gitignore
 .gitattributes
 
+build.ts
+
 ast.json
 table.csv
 structure.json
 
 fixup.sh
+bun.lockb
 pnpm-lock.yaml
 
 eslint.config.js

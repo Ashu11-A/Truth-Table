@@ -1,19 +1,22 @@
 {
   "name": "truth-table-ast",
-  "version": "1.0.0",
-  "main": "dist/cjs/index.js",
-  "module": "dist/mjs/index.js",
+  "version": "1.0.1",
+  "main": "dist/cjs/cli.js",
+  "module": "dist/mjs/cli.js",
   "typings": "dist/types/index.d.ts",
   "type": "module",
   "scripts": {
     "cli": "tsx src/cli.ts",
     "dev": "tsx src/app.ts",
     "lint": "eslint -c eslint.config.mjs",
-    "build": "rimraf dist && tsc -p tsconfig.mjs.json && tsc -p tsconfig.cjs.json && tsc -p tsconfig.dts.json && ./fixup.sh"
+    "build": "rimraf dist && mv src/app.ts ./ && npm run build:mjs && npm run build:dts && npm run build:cjs && ./fixup.sh && mv ./app.ts src/ && npm run lint -- --fix",
+    "build:mjs": "tsc -p tsconfig.mjs.json && tsc-alias -p tsconfig.mjs.json",
+    "build:cjs": "npx tsx build.ts",
+    "build:dts": "tsc -p tsconfig.dts.json && tsc-alias -p tsconfig.dts.json"
   },
   "bin": {
-    "truth-table": "dist/cjs/index.js",
-    "tt": "dist/cjs/index.js"
+    "truth-table": "dist/cjs/cli.js",
+    "tt": "dist/cjs/cli.js"
   },
   "typesVersions": {
     "*": {
@@ -61,10 +64,9 @@
   "description": "Formatters for truth tables",
   "devDependencies": {
     "@eslint/js": "^9.9.1",
-    "@swc/core": "^1.7.26",
-    "@swc/types": "^0.1.12",
     "@types/node": "^22.5.4",
     "eslint": "^9.9.1",
+    "glob": "^11.0.0",
     "globals": "^15.9.0",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",

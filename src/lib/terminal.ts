@@ -44,7 +44,7 @@ export class Terminal {
 
   static help () {
     const output: string[] = []
-    output.push('Usage: ttt [options]\n')
+    output.push('Usage: tt [options]\n')
     output.push('  Options:\n')
 
     const maxAliasLength = Math.max(...Terminal.args.map(arg => arg.alias.join(', ').length))

@@ -28,6 +28,7 @@ To get a local copy up and running, follow these simple steps:
 
 Prerequisites
 Node.js (v20+ recommended)
+
 NPM (recommended)
 
 ### Installation
@@ -36,6 +37,29 @@ npm i truth-table-ast
 ```
 
 ## 📚 | Usage
+### 📟 | Terminal:
+
+```sh
+tt -p "p ˅ (p ^ q)"
+# OR
+npx truth-table -p "p ˅ (p ^ q)" -o table.csv
+```
+
+#### 📄 | Help:
+
+```txt
+Usage: ttt [options]
+
+  Options:
+
+   -h --help        Show all available arguments
+   -o --output      File where the truth table will be saved
+   -d --display     How the data will be displayed in the table, supports: boolean, number
+   -t --type        Type of file the table will be saved in (csv | text)
+   -p --proposition Define proposition to generate truth table
+```
+
+### 👨‍💻 | Code:
 Here's an example of how to work with this library:
 ```ts
 // ESM:
@@ -43,8 +67,8 @@ import { AST, Structure, Table } from 'truth-table-ast'
 // Communjs:
 // const { AST, Structure, Table } = require('truth-table-ast')
 
-const input = 'p ^ q'
-const parser = new AST(input)
+const input = 'p ˅ (p ^ q)'
+const parser = await (new AST(input)).loader() // Loader must be initialized at least once, before any parse interaction
 const ast = parser.parse()
 // await parser.save('ast.json')
 
@@ -53,17 +77,17 @@ if (AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
 const structure = new Structure(ast).generate()
 // await structure.save('structure.json')
 
-new Table({
+await (new Table({
   structure,
   type: 'csv',
   display: 'boolean'
-}).create('table.csv')
+})).create('table.csv')
 ```
 
 ## ✨ | Outputs
 
 #### 📜 | AST:
-The AST (Abstract Syntax Tree) generated from the input:
+The AST (Abstract Syntax Tree) generated from the input of p ˅ (p ^ q):
 ```json
 [
   {
@@ -83,13 +107,32 @@ The AST (Abstract Syntax Tree) generated from the input:
   },
   {
     "type": "Operation",
-    "value": "^",
-    "key": "Conjunction",
+    "value": "˅",
+    "key": "Disjunction",
     "loc": {...}
   },
   {
-    "value": "q",
-    "type": "Proposition",
+    "type": "SubExpression",
+    "body": [
+      {
+        "value": "p",
+        "type": "Proposition",
+        "negatived": false,
+        "loc": {...}
+      },
+      {
+        "type": "Operation",
+        "value": "^",
+        "key": "Conjunction",
+        "loc": {...}
+      },
+      {
+        "value": "q",
+        "type": "Proposition",
+        "negatived": false,
+        "loc": {...}
+      }
+    ],
     "negatived": false,
     "loc": {...}
   }
@@ -97,7 +140,7 @@ The AST (Abstract Syntax Tree) generated from the input:
 ```
 
 #### 📃 | Structure:
-The structured data used to generate the truth table:
+The structured data generated from the AST to generate the truth table:
 ```json
 [
   {
@@ -118,60 +161,13 @@ The structured data used to generate the truth table:
   },
   {
     "type": "Result",
-    "element": "p ^ q",
+    "element": "p ˅ (p ^ q)",
     "value": true,
     "column": 2,
     "row": 0,
     "position": "0x2"
   },
-  {
-    "type": "Variable",
-    "element": "p",
-    "value": true,
-    "column": 0,
-    "row": 1,
-    "position": "1x0"
-  },
-  {
-    "type": "Variable",
-    "element": "q",
-    "value": false,
-    "column": 1,
-    "row": 1,
-    "position": "1x1"
-  },
-  {
-    "type": "Result",
-    "element": "p ^ q",
-    "value": false,
-    "column": 2,
-    "row": 1,
-    "position": "1x2"
-  },
-  {
-    "type": "Variable",
-    "element": "p",
-    "value": false,
-    "column": 0,
-    "row": 2,
-    "position": "2x0"
-  },
-  {
-    "type": "Variable",
-    "element": "q",
-    "value": true,
-    "column": 1,
-    "row": 2,
-    "position": "2x1"
-  },
-  {
-    "type": "Result",
-    "element": "p ^ q",
-    "value": false,
-    "column": 2,
-    "row": 2,
-    "position": "2x2"
-  },
+  {...},
   {
     "type": "Variable",
     "element": "p",
@@ -190,7 +186,7 @@ The structured data used to generate the truth table:
   },
   {
     "type": "Result",
-    "element": "p ^ q",
+    "element": "p ˅ (p ^ q)",
     "value": false,
     "column": 2,
     "row": 3,
@@ -200,12 +196,12 @@ The structured data used to generate the truth table:
 ```
 
 #### 📋 | Truth Table:
-|   p   |   q   | p ^ q
-|-------|-------|-------|
-| true  | true  | true  |
-| true  | false | false |
-| false | true  | false |
-| false | false | false |
+|   p   |   q   | p ˅ (p ^ q)
+|-------|-------|------------|
+| true  | true  | true       |
+| true  | false | true       |
+| false | true  | false      |
+| false | false | false      |
 
 ## 🤝 | Contributing
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.

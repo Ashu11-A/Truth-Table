@@ -42,7 +42,7 @@ export type SubExpression = {
     body: Node[]
 }
 
-export type Tokanizer = {
+export type Tokenizer = {
     value: OperationValues | string,
     loc: SourceLocation
 }

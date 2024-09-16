@@ -149,8 +149,10 @@ export class Structure {
         case 'SubExpression': {
           // Para subexpressões, processar recursivamente
           index++
-          const subResult = evaluateRecursively()
-          result.push(subResult)
+          const subResult = this.evaluateExpression(node.body, values)
+
+          input.push(`(${subResult[0].expression})`)
+          result.push(...subResult.map((result) => result.value))
           break
         }
         }

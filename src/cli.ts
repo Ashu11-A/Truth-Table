@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import './index.js'
-import { Terminal } from './class/terminal.js'
+import { Terminal } from './lib/terminal.js'
 import { Structure, Table, TableType } from './index.js'
 import { AST } from './class/ast.js'
 
@@ -60,13 +60,16 @@ new Terminal([
     hasString: true,
     async function(content) {
       if (content === undefined) throw new Error('Preposition not defined!')
-      const ast = new AST(content).parse()
 
+      const ast = (await new AST(content).loader()).parse()
       if(AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
 
       const structure = new Structure(ast).generate()
-      console.log(structure)
-      if (filePath) await new Table({ structure, ...TableSettings }).create(filePath)
+      if (filePath) {
+        await new Table({ structure, ...TableSettings }).create(filePath)
+      } else {
+        console.log(structure)
+      }
     },
   }
 ]).run(args)
