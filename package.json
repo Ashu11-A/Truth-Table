@@ -1,6 +1,6 @@
 {
   "name": "truth-table-ast",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/cjs/cli.js",
   "module": "dist/mjs/cli.js",
   "typings": "dist/types/index.d.ts",
