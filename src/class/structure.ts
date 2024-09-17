@@ -92,7 +92,7 @@ export class Structure {
     let index = 0
     const input: string[] = []
     const expressions: { expression: string, value: boolean, values: boolean[], type: OperationKey }[] = []
-    
+
     /**
      * Obtém o próximo nó na expressão com base no índice fornecido.
      * 
@@ -115,7 +115,7 @@ export class Structure {
       // Processa a fórmula com base no tipo de operação
       const processed = this.processFormula(currentValues, opType)
       expressions.push({ expression: input.join(' '), value: processed, values: currentValues, type: opType })
-  
+
       return processed
     }
 
@@ -147,11 +147,12 @@ export class Structure {
           break
         }
         case 'SubExpression': {
-          // Para subexpressões, processar recursivamente
-          index++
           const subResult = this.evaluateExpression(node.body, values)
+          const displayName = `(${subResult[0].expression})`
 
-          input.push(`(${subResult[0].expression})`)
+          expressions.push(...subResult.map((values) => ({ ...values, expression: displayName })))
+
+          input.push(displayName)
           result.push(...subResult.map((result) => result.value))
           break
         }

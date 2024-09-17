@@ -2,7 +2,7 @@ import { AST } from './class/ast.js'
 import { Structure } from './class/structure.js'
 import { Table } from './class/table.js'
 
-const input = 'p ˅ (p ^ q)'
+const input = 'p ˅ (k ^ l) ^ i'
 const parser = await (new AST(input)).loader() // Loader must be initialized at least once, before any parse interaction
 const ast = parser.parse()
 
