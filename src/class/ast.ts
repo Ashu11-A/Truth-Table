@@ -1,6 +1,6 @@
 import { writeFile } from 'fs/promises'
 import { biconditionalExpressions, conditionalExpressions, conjunctionExpressions, disjunctionExpressions, lettersAllowed, negationExpressions, operationsAllowed, subExpressions, xorExpressions } from '../index.js'
-import { ErrorType, UnexpectedError } from '../lib/error.js'
+import { ErrorType, NotInstantiatedError, UndeterminedError, UnexpectedError } from '../lib/error.js'
 import { Node, OperationKey, OperationValues, Tokenizer } from '../types/ast.js'
 import { Method } from './astMethods.js'
 
@@ -8,6 +8,7 @@ export class AST {
   public readonly tokens: Tokenizer [] = []
   public ast: Node[] | undefined
   public parseIndex = 0
+
   constructor(public input: string) {
     this.tokens = this.tokenize(this.input)
   }
@@ -23,15 +24,14 @@ export class AST {
    * A AST resultante é um array de nós, onde cada nó contém o valor, tipo, e a posição do token.
    * 
    * @returns {Node[]} Retorna a AST gerada
-   * 
-   * @throws {Error} Se houver tokens inválidos, a função `validation` irá lançar um erro com a linha e a coluna do token inválido.
    */
   parse(tokens?: Tokenizer[], index?: number): Node[] | ErrorType {
     tokens = tokens ?? this.tokens
     let actualIndex = index ?? this.parseIndex
-    this.validation(tokens)
-
     const ast: Node[] = []
+    const err = this.validation(tokens)
+    if (err !== undefined) return err
+
 
     while (actualIndex < tokens.length) {
       const { value, loc } = tokens[actualIndex]
@@ -39,8 +39,8 @@ export class AST {
       switch (true) {
       case lettersAllowed.includes(value): {
         const result = Method?.execute?.({ type: 'Proposition', ast: this, index: actualIndex, tokens })
-        if (result === undefined) throw new Error('The Proposition method is not instantiated')
-        if (AST.isUnexpectedError(result)) return result
+        if (result === undefined) return new NotInstantiatedError({ method: 'Proposition', loc })
+        if (AST.isError(result)) return result
 
         ast.push(result)
         actualIndex++
@@ -56,8 +56,8 @@ export class AST {
           continue
         }
         const result = Method?.execute?.({ type: 'Operation', ast: this, index: actualIndex, tokens })
-        if (result === undefined) throw new Error('The Operation method is not instantiated')
-        if (AST.isUnexpectedError(result)) return result
+        if (result === undefined) return new NotInstantiatedError({ method: 'Operation', loc })
+        if (AST.isError(result)) return result
 
         ast.push(result)
         actualIndex++
@@ -66,15 +66,15 @@ export class AST {
       }
       case value === '(': {
         const result = Method?.execute?.({ type: 'SubExpression', ast: this, index: actualIndex, tokens })
-        if (result === undefined) throw new Error('The SubExpression method is not instantiated')
-        if (AST.isUnexpectedError(result)) return result
+        if (result === undefined) return new NotInstantiatedError({ method: 'SubExpression', loc })
+        if (AST.isError(result)) return result
 
         ast.push(result)
         actualIndex = ++this.parseIndex
         break
       }
       default: {
-        throw new Error(`In the row: ${loc.start.line} Column: ${loc.start.column} It was not possible to determine what the value would be: ${value}`)
+        return new UndeterminedError({ value, loc })
       }
       }
     }
@@ -151,17 +151,14 @@ export class AST {
     * Se algum token contiver um valor não permitido, lança um erro especificando a linha e a coluna do valor inválido.
     *
     * @param {Tokenizer[]} tokens - Uma lista de tokens a serem validados, onde cada token contém o valor e sua localização.
-    * 
-    * @throws {Error} Se algum valor no token não estiver na lista de caracteres permitidos, 
-    * lança um erro detalhando a linha e a coluna do valor inválido.
-    * 
     */
-  validation(tokens: Tokenizer[]): void {
+  validation(tokens: Tokenizer[]): ErrorType | undefined {
     for (const { loc, value } of tokens) {
-      if (![...lettersAllowed, ...operationsAllowed, ...subExpressions].includes(value)) {
-        throw new Error(`In the row: ${loc.start.line} Column: ${loc.start.column} It was not possible to determine what the value would be: ${value}`)
+      if (![lettersAllowed, operationsAllowed, subExpressions].flat().includes(value)) {
+        return new UndeterminedError({ value, loc })
       }
     }
+    return
   }
 
   validationAST(ast: Node[]): ErrorType | undefined {
@@ -257,12 +254,12 @@ export class AST {
    * @returns {Promise<void>} A promise that resolves when the file has been successfully saved.
    */
   async save(path: string): Promise<void> {
-    if (this.ast === undefined) throw new Error('AST is undefined, use the parse function before save!')
+    if (this.ast === undefined) throw new Error('AST is undefined, use the parser function before saving, or an error occurred while parsing.')
     await writeFile(path, JSON.stringify(this.ast, null, 2))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static isUnexpectedError(object: any): object is ErrorType {
-    return object['code'] === 'Unexpected'
+  static isError(object: any): object is ErrorType {
+    return ['Unexpected', 'NotInstantiated', 'Undetermined', 'WasExperienced'].includes(object?.['code'])
   }
 }

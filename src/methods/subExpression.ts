@@ -1,5 +1,6 @@
 import { Method } from '../class/astMethods.js'
 import { AST } from '../class/index.js'
+import { BaseError } from '../lib/error.js'
 import { Tokenizer } from '../types/ast.js'
 
 new Method({
@@ -19,7 +20,12 @@ new Method({
       } else if (currentToken.value === ')') {
         parenthesesCount--
       } else if ((index + 1) === tokens.length) {
-        throw new Error(`It was expected that there would be a “)”, in row: ${currentToken.loc.start.line}, column: ${currentToken.loc.start.column}.`)
+        return new BaseError({
+          message: `It was expected that there would be a “)”, in row: ${currentToken.loc.start.line}, column: ${currentToken.loc.start.column}.`,
+          code: 'WasExperienced',
+          statusCode: 783,
+          loc
+        })
       }
 
       if (parenthesesCount > 0) {
@@ -29,7 +35,7 @@ new Method({
     }
 
     const body = ast.parse(subExprTokens, 0)
-    if (AST.isUnexpectedError(body)) return body
+    if (AST.isError(body)) return body
 
     return {
       type: 'SubExpression',

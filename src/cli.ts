@@ -62,7 +62,7 @@ new Terminal([
       if (content === undefined) throw new Error('Preposition not defined!')
 
       const ast = (await new AST(content).loader()).parse()
-      if(AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
+      if(AST.isError(ast)) throw new Error(JSON.stringify(ast, null, 2))
 
       const structure = new Structure(ast).generate()
       if (filePath) {

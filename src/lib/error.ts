@@ -7,10 +7,18 @@ export type ErrorType = BaseAST & {
   statusCode: number
 }
 
-type UnexpectedType = BaseAST & {
+export type UnexpectedType = BaseAST & {
   origin: string,
   expected: string[],
   unexpected: string
+}
+
+export type NotInstantiatedType = BaseAST & {
+  method: string
+}
+
+export type UndeterminedType = BaseAST & {
+  value: string
 }
 
 export class BaseError extends Error {
@@ -44,7 +52,29 @@ export class UnexpectedError extends BaseError {
     super({
       message: `It was expected that, after an ${origin} element, there would be a ${expected.join(' or ')} element, but there were ${unexpected}`,
       code: 'Unexpected',
-      statusCode: 2422, // code 2422: Windows Server 2008 R2
+      statusCode: 500,
+      loc
+    })
+  }
+}
+
+export class NotInstantiatedError extends BaseError {
+  constructor({ loc, method }: NotInstantiatedType) {
+    super({
+      message: `The ${method} method is not instantiated`,
+      code: 'NotInstantiated',
+      statusCode: 404,
+      loc
+    })
+  }
+}
+
+export class UndeterminedError extends BaseError {
+  constructor({ loc, value }: UndeterminedType) {
+    super({
+      message: `It was not possible to determine what the value would be: ${value}`,
+      code: 'Undetermined',
+      statusCode: 406,
       loc
     })
   }
