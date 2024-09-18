@@ -17,7 +17,7 @@ export class Structure {
    * @type {string[]}
    */
   public columns: number = 0
-  private rows: number = 0
+  public rows: number = 0
   public structure: StructureJson = []
   public propositions: string[] = []
 
@@ -78,6 +78,7 @@ export class Structure {
 
     this.structure = values
     this.propositions = Array.from(new Set(this.propositions)) // Remove duplicatas recorrentes de this.evaluateExpression
+    this.columns = this.propositions.length
     return this
   }
 

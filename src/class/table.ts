@@ -90,7 +90,7 @@ export class Table {
       writeFile(filePath, content)
       break
     }
-    case 'text':
+    case 'txt':
     }
   }
 }

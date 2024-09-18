@@ -10,7 +10,7 @@ export type TableType = {
      *
      * @type {'csv' | 'text'}
      */
-    type: 'csv' | 'text'
+    type: 'csv' | 'txt'
   
     /**
      * The optional display format for the table values. If provided, it specifies whether the values will be displayed as booleans ('boolean')

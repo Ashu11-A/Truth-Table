@@ -48,7 +48,7 @@ new Terminal([
     rank: 1,
     hasString: true,
     async function(content) {
-      if (!(content === 'csv' || content === 'text')) throw new Error('Type command can only be csv or text')
+      if (!(content === 'csv' || content === 'txt')) throw new Error('Type command can only be csv or text')
       Object.assign(TableSettings, { type: content } satisfies Partial<TableType>)
     }
   },
