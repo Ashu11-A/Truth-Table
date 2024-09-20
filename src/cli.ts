@@ -37,7 +37,7 @@ new Terminal([
     rank: 1,
     hasString: true,
     async function(content) {
-      if (!(content === 'number' || content === 'boolean')) throw new Error('Display command can only be “boolean” or “text”')
+      if (!(content === 'number' || content === 'boolean')) throw new Error('Display command can only be “boolean” or number')
       Object.assign(TableSettings, { display: content } satisfies Partial<TableType>)
     }
   },
@@ -48,7 +48,7 @@ new Terminal([
     rank: 1,
     hasString: true,
     async function(content) {
-      if (!(content === 'csv' || content === 'txt')) throw new Error('Type command can only be csv or text')
+      if (!(content === 'csv' || content === 'markdown')) throw new Error('Type command can only be csv or text')
       Object.assign(TableSettings, { type: content } satisfies Partial<TableType>)
     }
   },

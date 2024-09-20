@@ -77,6 +77,84 @@ export class Table {
   }
 
   /**
+ * Gera uma representação em Markdown de uma tabela lógica a partir da estrutura definida.
+ * A tabela inclui proposições e suas respectivas expressões, formatando o conteúdo de forma
+ * a garantir que todas as colunas estejam corretamente alinhadas e centralizadas.
+ * 
+ * @returns {string}
+ */
+  markdown(): string {
+  // Obtém as proposições do cabeçalho da estrutura
+    const header = Object.values(this.structure.propositions)
+    let lineContent = ''
+
+    /**
+   * Calcula o comprimento máximo entre os arrays fornecidos.
+   * 
+   * @param {string[][]} arrays - Um ou mais arrays de strings.
+   * @returns {number} O comprimento máximo encontrado entre as strings.
+   */
+    const getMaxLen = (...arrays: string[][]) => 
+      Math.max(...arrays.flat().map((value) => value.length))
+
+    /**
+   * Calcula o preenchimento necessário para centralizar o conteúdo.
+   * 
+   * @param {string} content - O conteúdo que precisa ser centralizado.
+   * @returns {{ leftPad: number, rightPad: number }} O número de espaços à esquerda e à direita.
+   */
+    const getPadding = (content: string) => {
+      const totalSpace = maxLen - content.length
+      const leftPad = Math.floor(totalSpace / 2)
+      const rightPad = Math.ceil(totalSpace / 2)
+      return { leftPad, rightPad }
+    }
+
+    /**
+   * Formata a linha de separadores da tabela.
+   * 
+   * @param {string[]} row - A linha contendo os cabeçalhos ou valores.
+   * @returns {string} A linha formatada com separadores.
+   */
+    const formatSeparator = (row: string[]) => 
+      row.map(() => `|${'-'.repeat(maxLen)}`).join('') + '|\n'
+
+    /**
+   * Formata uma linha de conteúdo da tabela, centralizando cada valor.
+   * 
+   * @param {string[]} row - A linha contendo os valores a serem formatados.
+   * @returns {string} A linha formatada com o conteúdo centralizado.
+   */
+    const formatRow = (row: string[]) => 
+      row.map((value) => {
+        const { leftPad, rightPad } = getPadding(value)
+        return `|${' '.repeat(leftPad)}${value}${' '.repeat(rightPad)}`
+      }).join('') + '|'
+
+    // Tamanho do espaçamento
+    const maxLen = getMaxLen(
+      header,
+      this.structure.structure.map((expression) => expression.element),
+      this.structure.structure.map((expression) => String(expression.value))
+    )
+
+    // Adiciona o cabeçalho formatado ao conteúdo da linha
+    lineContent += formatRow(header) + '\n'
+    // Adiciona a linha de separadores ao conteúdo da linha
+    lineContent += formatSeparator(header)
+
+    // Itera pelas linhas da estrutura e adiciona o conteúdo formatado
+    for (let line = 0; line < this.structure.rows; line++) {
+      const elements = this.structure.structure.filter((element) => element.row === line)
+      const rowContent = elements.map((element) => String(element.value))
+      lineContent += formatRow(rowContent) + '\n'
+    }
+
+    return lineContent
+  }
+
+
+  /**
    * Creates a file based on the table type (e.g., CSV) and writes the content to the specified file path.
    *
    * @async
@@ -84,13 +162,16 @@ export class Table {
    * @returns {Promise<void>} A promise that resolves when the file has been successfully written.
    */
   async create (filePath: string): Promise<void> {
-    switch (this.type) {
+    switch (this.type ?? 'csv') {
     case 'csv': {
       const content = this.csv()
-      writeFile(filePath, content)
+      await writeFile(filePath, content)
       break
     }
-    case 'txt':
+    case 'markdown': {
+      const content = this.markdown()
+      await writeFile(filePath, content, { encoding: 'utf-8' })
+    }
     }
   }
 }

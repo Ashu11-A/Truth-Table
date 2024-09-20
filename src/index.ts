@@ -6,7 +6,7 @@ export const lettersAllowed = 'abcdefghijklmnopqrsuwxyz'.split('')
 
 export const negationExpressions = ['¬', '~']
 export const conjunctionExpressions = ['^', '∧']
-export const disjunctionExpressions = ['∨', '˅']
+export const disjunctionExpressions = ['∨', '˅', 'v']
 export const conditionalExpressions = ['→', '->']
 export const biconditionalExpressions = ['↔', '<>', '<->']
 export const xorExpressions = ['⊕']

@@ -19,7 +19,7 @@ export type StructureJson = Array<{
      */
     value: boolean
 
-    type: 'Result' | 'Variable'
+    type: 'Result' | 'Variable' | 'VariableNegative'
 
     /**
      * The position of the element in the table, represented as a string in the format 'rowxcolumn' (e.g., '0x1').

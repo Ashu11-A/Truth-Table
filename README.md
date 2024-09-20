@@ -67,27 +67,36 @@ import { AST, Structure, Table } from 'truth-table-ast'
 // Communjs:
 // const { AST, Structure, Table } = require('truth-table-ast')
 
-const input = 'p ˅ (p ^ q)'
+const input = 'p ^ (p v ~q)'
 const parser = await (new AST(input)).loader() // Loader must be initialized at least once, before any parse interaction
 const ast = parser.parse()
-// await parser.save('ast.json')
 
-if (AST.isUnexpectedError(ast)) throw new Error(JSON.stringify(ast, null, 2))
+if (AST.isError(ast)) throw new Error(JSON.stringify(ast, null, 2))
+await parser.save('ast.json')
 
 const structure = new Structure(ast).generate()
-// await structure.save('structure.json')
+await structure.save('structure.json')
 
-await (new Table({
+const table = new Table({
   structure,
-  type: 'csv',
-  display: 'boolean'
-})).create('table.csv')
+  display: 'boolean',
+  // type: 'csv'
+})
+
+// const content = table.csv()
+// const content = table.markdown()
+
+table.type = 'markdown'
+await table.create('table.md')
+
+table.type = 'csv'
+await table.create('table.csv')
 ```
 
 ## ✨ | Outputs
 
 #### 📜 | AST:
-The AST (Abstract Syntax Tree) generated from the input of p ˅ (p ^ q):
+The AST (Abstract Syntax Tree) generated from the input of p ^ (p v ~q):
 ```json
 [
   {
@@ -107,8 +116,8 @@ The AST (Abstract Syntax Tree) generated from the input of p ˅ (p ^ q):
   },
   {
     "type": "Operation",
-    "value": "˅",
-    "key": "Disjunction",
+    "value": "^",
+    "key": "Conjunction",
     "loc": {...}
   },
   {
@@ -122,14 +131,14 @@ The AST (Abstract Syntax Tree) generated from the input of p ˅ (p ^ q):
       },
       {
         "type": "Operation",
-        "value": "^",
-        "key": "Conjunction",
+        "value": "v",
+        "key": "Disjunction",
         "loc": {...}
       },
       {
         "value": "q",
         "type": "Proposition",
-        "negatived": false,
+        "negatived": true,
         "loc": {...}
       }
     ],
@@ -160,48 +169,40 @@ The structured data generated from the AST to generate the truth table:
     "position": "0x1"
   },
   {
-    "type": "Result",
-    "element": "p ˅ (p ^ q)",
-    "value": true,
+    "type": "VariableNegative",
+    "element": "~q",
+    "value": false,
     "column": 2,
     "row": 0,
     "position": "0x2"
   },
-  {...},
   {
-    "type": "Variable",
-    "element": "p",
-    "value": false,
-    "column": 0,
-    "row": 3,
-    "position": "3x0"
-  },
-  {
-    "type": "Variable",
-    "element": "q",
-    "value": false,
-    "column": 1,
-    "row": 3,
-    "position": "3x1"
+    "type": "Result",
+    "element": "(p v ~q)",
+    "value": true,
+    "column": 3,
+    "row": 0,
+    "position": "0x3"
   },
   {
     "type": "Result",
-    "element": "p ˅ (p ^ q)",
-    "value": false,
-    "column": 2,
-    "row": 3,
-    "position": "3x2"
-  }
+    "element": "p ^ (p v ~q)",
+    "value": true,
+    "column": 4,
+    "row": 0,
+    "position": "0x4"
+  },
+  {...}
 ]
 ```
 
 #### 📋 | Truth Table:
-|   p   |   q   | p ˅ (p ^ q)
-|-------|-------|------------|
-| true  | true  | true       |
-| true  | false | true       |
-| false | true  | false      |
-| false | false | false      |
+|     p      |     q      |     ~q     |  (p v ~q)  |p ^ (p v ~q)|
+|------------|------------|------------|------------|------------|
+|    true    |    true    |   false    |    true    |    true    |
+|    true    |   false    |    true    |    true    |    true    |
+|   false    |    true    |   false    |   false    |   false    |
+|   false    |   false    |    true    |    true    |   false    |
 
 ## 🤝 | Contributing
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.

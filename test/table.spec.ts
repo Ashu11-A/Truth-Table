@@ -16,17 +16,30 @@ describe('TableGenetate', () => {
     const structure = new Structure(nodes).generate()
 
     for (const display of ['boolean', 'number']) {
-      for (const type of ['csv', 'txt']) {
-        const table = new Table({ structure, type: type as 'csv' | 'txt', display: display as 'number' | 'boolean' })
-    
-        await table.create(`table.${type}`)
+      for (const type of ['csv', 'markdown']) {
+        const table = new Table({ structure, display: display as 'number' | 'boolean' })
+  
+        switch (type as 'csv' | 'markdown') {
+        case 'csv': {
+          table.type = 'csv'
+          await table.create('table.csv')
+          break
+        }
+        case 'markdown': {
+          table.type = 'markdown'
+          await table.create('table.md')
+          break
+        }
+        }
       }
     }
 
     expect((await stat('table.csv')).isFile()).toBe(true)
+    expect((await stat('table.md')).isFile()).toBe(true)
   })
 
   afterAll(async () => {
     await rm('table.csv')
+    await rm('table.md')
   })
 })

@@ -129,3 +129,4 @@ dist
 ast.json
 structure.json
 *.lockb
+table.md

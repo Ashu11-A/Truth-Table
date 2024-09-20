@@ -1,5 +1,5 @@
 import { writeFile } from 'fs/promises'
-import { Node, OperationKey } from '../types/ast.js'
+import { BaseAST, Node, OperationKey, Proposition } from '../types/ast.js'
 import { StructureJson } from '../types/structure.js'
 
 /**
@@ -22,7 +22,7 @@ export class Structure {
   public propositions: string[] = []
 
   constructor(public ast: Node[]) {
-    this.propositions = this.getPropositions()
+    this.propositions = this.getPropositions().map((element) => element.value)
     this.columns = this.propositions.length
     // Faz 2 elevado ao numero de colunas
     this.rows = 2 ** this.columns
@@ -61,6 +61,21 @@ export class Structure {
         })
       }
 
+      const negatives = this.getPropositions().filter((propositions) => propositions.negatived)
+      for (const element of negatives) {
+        const column = values.findIndex((value) => value.element === element.value)
+        const value = `~${element.value}`
+        this.propositions.push(value)
+        values.push({
+          type: 'VariableNegative',
+          element: value,
+          value: !rowValues[this.propositions[column]],
+          column: this.columns,
+          row,
+          position: `${row}x${this.columns}`
+        })
+      }
+
       // Calcula e adiciona o resultado da expressão lógica
       this.evaluateExpression(this.ast, rowValues).map(({ expression, value }, index) => {
         this.propositions.push(expression)
@@ -68,11 +83,10 @@ export class Structure {
           type: 'Result',
           element: expression,
           value,
-          column: this.columns + index,
+          column: this.columns + negatives.length + index,
           row,
-          position: `${row}x${this.columns + index}`
+          position: `${row}x${this.columns + negatives.length + index}`
         })
-
       })
     }
 
@@ -121,7 +135,7 @@ export class Structure {
     }
 
     const evaluateRecursively = (): boolean => {
-      const result: boolean[] = []
+      const results: boolean[] = []
       let currentOperation: OperationKey | undefined = undefined
       
       while (index < expression.length) {
@@ -130,8 +144,12 @@ export class Structure {
 
         switch (node.type) {
         case 'Proposition': {
-          input.push(node.value)
-          result.push(values[node.value])
+          const proposition = node.negatived ? `~${node.value}` : node.value
+          const value = values[node.value]
+          const result = node.negatived ? !value : value
+  
+          input.push(proposition)
+          results.push(result)
           break
         }
         case 'Operation': {
@@ -140,8 +158,8 @@ export class Structure {
            * pois queremos processar diferentes tipos de operação separadamente.
            */
           if (currentOperation !== undefined && currentOperation !== node.key as OperationKey) {
-            processOperation(currentOperation, result)
-            result.length = 0
+            processOperation(currentOperation, results)
+            results.length = 0
           }
           currentOperation = node.key as OperationKey
           input.push(node.value)
@@ -154,14 +172,14 @@ export class Structure {
           expressions.push(...subResult.map((values) => ({ ...values, expression: displayName })))
 
           input.push(displayName)
-          result.push(...subResult.map((result) => result.value))
+          results.push(...subResult.map((result) => result.value))
           break
         }
         }
         
         index++
       }
-      return processOperation(currentOperation as OperationKey, result)
+      return processOperation(currentOperation as OperationKey, results)
     }
     evaluateRecursively()
 
@@ -210,9 +228,9 @@ export class Structure {
    * @param {Node[]} [ast] - A árvore de sintaxe abstrata a ser processada. Se não fornecida, usa a AST interna.
    * @returns {string[]} - Uma lista de proposições únicas.
    */
-  getPropositions(ast?: Node[]): string[] {
+  getPropositions(ast?: Node[]): (Proposition & BaseAST)[] {
     ast = (ast ?? this.ast)
-    let propositions: string[] = []
+    let propositions:(Proposition & BaseAST)[] = []
 
     /**
      * Processa os elementos da árvore de sintaxe abstrata para coletar as proposições.
@@ -221,14 +239,27 @@ export class Structure {
      */
     const process = (elements: Node[]) => {
       for (const element of elements) {
-        if (element.type === 'Proposition') propositions.push(element.value)
+        if (element.type === 'Proposition') propositions.push(element)
         if (element.type === 'SubExpression') process(element.body)
       }
     }
     process(ast)
+    
+    // Se existir algum element, que é negativo, apenas deixe a representação negativa
+    const propositionMap = new Map<string, Proposition & BaseAST>()
 
-    // Remove duplicatas
-    propositions = [...(new Set(propositions))]
+    for (const proposition of propositions) {
+      const key = proposition.value // Usar o valor da proposição como chave
+      if (!propositionMap.has(key)) {
+        // Se não existe ainda, adicionar a proposição
+        propositionMap.set(key, proposition)
+      } else if (proposition.negatived) {
+        // Se já existe uma proposição com o mesmo valor, preferir a negativa (negatived: true)
+        propositionMap.set(key, proposition)
+      }
+    }
+
+    propositions = [...propositionMap.values()]
     return propositions
   }
 
