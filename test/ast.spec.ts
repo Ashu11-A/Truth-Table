@@ -1,20 +1,12 @@
 import { jest } from '@jest/globals'
 import { existsSync } from 'fs'
 import { rm } from 'fs/promises'
-import { Node, NotInstantiatedError, SubExpression } from '../src'
+import { Node, SubExpression } from '../src'
 import { AST } from '../src/class/ast'
 
 jest.useFakeTimers()
 
 describe('ASTGenerate', () => {
-  // Isso deve estar como primeiro teste, pois o "parser.loader()"" não foi rodado ainda
-  it('NotInstantiatedError', async () => {
-    for (const element of ['p', '^', '(']) {
-      const parser = new AST(element)
-      expect(parser.parse() instanceof NotInstantiatedError).toBe(true)
-    }
-  })
-
   const isProposition = (node: Node, value: string) =>
     node.type === 'Proposition' && node.value === value
   
@@ -30,7 +22,6 @@ describe('ASTGenerate', () => {
 
   const parseExpression = async (expression: string) => {
     const parser = new AST(expression)
-    await parser.loader()
     return parser.parse()
   }
 
@@ -96,7 +87,6 @@ describe('ASTGenerate', () => {
 
   it('Save AST', async () => {
     const parser = new AST('p ^ ~q')
-    await parser.loader()
 
     /**
      * Casa haja uma tentativa de salvar antes do momento de processamento,

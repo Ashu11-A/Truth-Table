@@ -7,7 +7,6 @@ jest.useFakeTimers()
 describe('StructureGenerate', () => {
   it('Testing table structure generation (p ^ q)', async () => {
     const parser = new AST('p ^ ~q')
-    await parser.loader()
 
     const result = parser.parse()
     expect(AST.isError(result)).toBe(false)
@@ -29,7 +28,6 @@ describe('StructureGenerate', () => {
 
   it('Testing the generation of a more complex table structure (p ^ ~(q ˅ r))', async () => {
     const parser = new AST('p ^ ~(q ˅ r)')
-    await parser.loader()
 
     const result = parser.parse()
     expect(AST.isError(result)).toBe(false)

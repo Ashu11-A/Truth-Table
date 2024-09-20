@@ -7,9 +7,8 @@ jest.useFakeTimers()
 describe('TableGenetate', () => {
   it('Save Table', async () => {
     const parser = new AST('p ^ q')
-    await parser.loader()
-
     const result = parser.parse()
+  
     expect(AST.isError(result)).toBe(false)
 
     const nodes = result as Node[]

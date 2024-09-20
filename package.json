@@ -1,8 +1,9 @@
 {
   "name": "truth-table-ast",
-  "version": "1.0.4",
-  "main": "dist/cjs/cli.js",
-  "module": "dist/mjs/cli.js",
+  "version": "1.0.5",
+  "main": "dist/cjs/index.js",
+  "module": "dist/mjs/index.js",
+  "types": "dist/types/index.d.ts",
   "typings": "dist/types/index.d.ts",
   "type": "module",
   "scripts": {
@@ -10,14 +11,13 @@
     "cli": "tsx src/cli.ts",
     "dev": "tsx src/app.ts",
     "lint": "eslint -c eslint.config.mjs",
-    "build": "rimraf dist && mv src/app.ts ./ && npm run build:mjs && npm run build:dts && npm run build:cjs && ./fixup.sh && mv ./app.ts src/ && npm run lint -- --fix",
+    "build": "rimraf dist && npx tsx build.ts && npm run build:dts && ./fixup.sh",
     "build:mjs": "tsc -p tsconfig.mjs.json && tsc-alias -p tsconfig.mjs.json",
-    "build:cjs": "npx tsx build.ts",
-    "build:dts": "tsc -p tsconfig.dts.json && tsc-alias -p tsconfig.dts.json"
+    "build:dts": "mkdir dist/types && ./node_modules/.bin/dts-bundle-generator -o dist/types/index.d.ts --verbose --external-inlines=@babel/types -- src/index.ts"
   },
   "bin": {
-    "truth-table": "dist/cjs/cli.js",
-    "tt": "dist/cjs/cli.js"
+    "truth-table": "dist/cjs/index.js",
+    "tt": "dist/cjs/index.js"
   },
   "typesVersions": {
     "*": {
@@ -28,9 +28,9 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/mjs/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/cjs/index.js"
     }
   },
   "engines": {
@@ -68,6 +68,7 @@
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.13",
     "@types/node": "^22.5.4",
+    "dts-bundle-generator": "^9.5.1",
     "eslint": "^9.9.1",
     "glob": "^11.0.0",
     "globals": "^15.9.0",

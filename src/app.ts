@@ -3,7 +3,7 @@ import { Structure } from './class/structure.js'
 import { Table } from './class/table.js'
 
 const input = 'p ^ (p v ~q)'
-const parser = await (new AST(input)).loader() // Loader must be initialized at least once, before any parse interaction
+const parser = new AST(input) // Loader must be initialized at least once, before any parse interaction
 const ast = parser.parse()
 
 if (AST.isError(ast)) throw new Error(JSON.stringify(ast, null, 2))

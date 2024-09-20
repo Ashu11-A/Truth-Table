@@ -12,11 +12,6 @@ export class AST {
   constructor(public input: string) {
     this.tokens = this.tokenize(this.input)
   }
-
-  async loader(): Promise<AST> {
-    await Method.register()
-    return this
-  }
   
   /**
    * Analisa os tokens gerados pela função `tokenize`, valida-os e constrói a AST (Abstract Syntax Tree) com base nos tokens válidos.

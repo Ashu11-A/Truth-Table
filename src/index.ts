@@ -1,3 +1,8 @@
+import'./methods/operation.js'
+import'./methods/proposition.js'
+import'./methods/subExpression.js'
+import './cli.js'
+
 export * from './class/index.js'
 export * from './types/index.js'
 export * from './lib/index.js'
