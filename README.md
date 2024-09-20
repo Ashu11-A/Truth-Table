@@ -67,8 +67,13 @@ import { AST, Structure, Table } from 'truth-table-ast'
 // Communjs:
 // const { AST, Structure, Table } = require('truth-table-ast')
 
+// In communjs, you'll need to put the code in an anonymous function for the asynchronous functions to work
+// void (async () => {
+  // code here
+// })()
+
 const input = 'p ^ (p v ~q)'
-const parser = await (new AST(input)).loader() // Loader must be initialized at least once, before any parse interaction
+const parser = new AST(input)
 const ast = parser.parse()
 
 if (AST.isError(ast)) throw new Error(JSON.stringify(ast, null, 2))
@@ -81,7 +86,7 @@ const table = new Table({
   structure,
   display: 'boolean',
   // type: 'csv'
-})
+})//.create('table.csv')
 
 // const content = table.csv()
 // const content = table.markdown()
