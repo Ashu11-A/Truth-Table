@@ -37,11 +37,12 @@ npm i truth-table-ast
 ```
 
 ## 📚 | Usage
+After installing this package globally, you can use the following commands:
 ### 📟 | Terminal:
 
 ```sh
 tt -p "p ˅ (p ^ q)"
-# OR
+# Or use this if your operating system doesn't detect the package
 npx truth-table -p "p ˅ (p ^ q)" -o table.csv
 ```
 

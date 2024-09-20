@@ -1,7 +1,6 @@
 import { rename } from 'fs/promises'
 import { glob } from 'glob'
 import { build } from 'tsup'
-import { generateDtsBundle } from 'dts-bundle-generator'
 
 await build({
   platform: 'node',

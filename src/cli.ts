@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-import './index.js'
-import { Terminal } from './lib/terminal.js'
-import { Structure, Table, TableType } from './index.js'
-import { AST } from './class/ast.js'
+import { basename } from 'path'
 import { fileURLToPath } from 'url'
+import packageJ from '../package.json'
+import { AST } from './class/ast.js'
+import './index.js'
+import { Structure, Table, TableType } from './index.js'
+import { Terminal } from './lib/terminal.js'
 
 const args = process.argv.slice(2).map((arg) => arg.replace('--', ''))
 const TableSettings: TableType = { type: 'csv', display: 'boolean' }
@@ -12,7 +14,7 @@ let filePath: string | undefined
 
 // Verifica se o script está sendo executado diretamente
 (() => {
-  if (process.argv[1] !== fileURLToPath(import.meta.url)) return
+  if (process.argv[1] !== fileURLToPath(import.meta.url) && !Object.keys(packageJ.bin).includes(basename(process.argv[1]))) return
 
   new Terminal([
     {
