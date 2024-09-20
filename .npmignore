@@ -1,9 +1,15 @@
 /node_modules
 /src
+/coverage
+/test
+
+jest.config.ts
+
 
 CONTRIBUTING.md
 SECURITY.md
 CODE_OF_CONDUCT.md
+table.md
 
 .gitignore
 .gitattributes
