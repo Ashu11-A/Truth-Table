@@ -31,11 +31,11 @@ To get a local copy up and running, follow these simple steps:
 Prerequisites
 Node.js (v20+ recommended)
 
-NPM (recommended)
-
 ### Installation
 ```sh
 npm i truth-table-ast
+#OR
+npm i -g truth-table-ast
 ```
 
 ## 📚 | Usage
@@ -51,7 +51,7 @@ npx truth-table -p "p ˅ (p ^ q)" -o table.csv
 #### 📄 | Help:
 
 ```txt
-Usage: ttt [options]
+Usage: tt [options]
 
   Options:
 
