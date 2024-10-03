@@ -1,7 +1,7 @@
-import { Method } from '../class/astMethods.js'
-import { AST } from '../class/index.js'
+import { Method } from '../class/Methods.js'
+import { Analyzer, isError } from '../class/index.js'
 import { BaseError } from '../lib/error.js'
-import { Tokenizer } from '../types/ast.js'
+import { Tokenizer } from '../types/tokenizer.js'
 
 new Method({
   name: 'SubExpression',
@@ -10,32 +10,38 @@ new Method({
     const subExprTokens: Tokenizer[] = []
     let parenthesesCount = 1
     index++ // Pular o elemento '(' para que não fique em loop infinito
-    ast.parseIndex++
-    
+
     // Extrai todo que está dentro de ()
     while (index < tokens.length && parenthesesCount > 0) {
       const currentToken = tokens[index]
-      if (currentToken.value === '(') {
+
+      switch (true) {
+      case (currentToken.value === '('): {
         parenthesesCount++
-      } else if (currentToken.value === ')') {
+        break
+      }
+      case (currentToken.value === ')'): {
         parenthesesCount--
-      } else if ((index + 1) === tokens.length) {
+        break
+      }
+      case ((index + 1) === tokens.length): {
         return new BaseError({
           message: `It was expected that there would be a “)”, in row: ${currentToken.loc.start.line}, column: ${currentToken.loc.start.column}.`,
           code: 'WasExperienced',
           statusCode: 783,
-          loc
+          loc,
         })
       }
-
-      if (parenthesesCount > 0) {
-        subExprTokens.push(currentToken)
       }
+
+      // && (index + 1) < tokens.length será usado apra ignorar casos em que a expressão é assim:
+      // ((p ^ q) v (p ^ q)) <- ignora o ultimo )
+      if (parenthesesCount > 0 && (index + 1) < tokens.length) subExprTokens.push(currentToken)
       index++
     }
 
-    const body = ast.parse(subExprTokens, 0)
-    if (AST.isError(body)) return body
+    const body = new Analyzer({ tokenizer: { tokens: subExprTokens, exceptions: [] } }).parse(subExprTokens, 0)
+    if (isError(body)) return body
 
     return {
       type: 'SubExpression',
@@ -43,8 +49,8 @@ new Method({
       negatived: ast.getNegatived(tokens, index),
       loc: {
         start: loc.start,
-        end: tokens[ast.parseIndex].loc.end
-      }
+        end: tokens[index - 1].loc.end,
+      },
     }
   },
 })

@@ -2,7 +2,7 @@ import { jest } from '@jest/globals'
 import { existsSync } from 'fs'
 import { rm } from 'fs/promises'
 import { Node, SubExpression } from '../src'
-import { AST } from '../src/class/ast'
+import { Analyzer, isError } from '../src/class/ast'
 
 jest.useFakeTimers()
 
@@ -21,14 +21,14 @@ describe('ASTGenerate', () => {
   }
 
   const parseExpression = async (expression: string) => {
-    const parser = new AST(expression)
+    const parser = new Analyzer(expression)
     return parser.parse()
   }
 
   it('Test with simple expression (p ^ q)', async () => {
     const result = await parseExpression('p ^ q')
     
-    expect(AST.isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
     const nodes = result as Node[]
 
@@ -42,7 +42,7 @@ describe('ASTGenerate', () => {
   it('Complex test using SubExpression (p ^ (q ˅ r) → l ↔ y ⊕ o)', async () => {
     const result = await parseExpression('p ^ (q ˅ r) → l ↔ y ⊕ o')
     
-    expect(AST.isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
     const nodes = result as Node[]
 
@@ -81,12 +81,12 @@ describe('ASTGenerate', () => {
   errorTestCases.forEach(({ expression, description }) => {
     it(description, async () => {
       const result = await parseExpression(expression)
-      expect(AST.isError(result)).toBe(true)
+      expect(isError(result)).toBe(true)
     })
   })
 
-  it('Save AST', async () => {
-    const parser = new AST('p ^ ~q')
+  it('Save Analyzer', async () => {
+    const parser = new Analyzer('p ^ ~q')
 
     /**
      * Casa haja uma tentativa de salvar antes do momento de processamento,
@@ -95,7 +95,7 @@ describe('ASTGenerate', () => {
     expect(() => parser.save('ast.json')).rejects.toThrow(Error)
 
     const result = parser.parse()
-    expect(AST.isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
     await parser.save('ast.json')
     expect(existsSync('ast.json')).toBe(true)

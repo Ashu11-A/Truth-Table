@@ -1,20 +1,22 @@
 import { jest } from '@jest/globals'
-import { AST, Node, Structure } from '../src'
+import { Analyzer, isError, Node, Structure } from '../src'
 import { existsSync } from 'fs'
 import { rm } from 'fs/promises'
 jest.useFakeTimers()
 
 describe('StructureGenerate', () => {
-  it('Testing table structure generation (p ^ q)', async () => {
-    const parser = new AST('p ^ ~q')
+  it('Testing table structure generation (p ^ ~q)', async () => {
+    const parser = new Analyzer('p ^ ~q')
 
     const result = parser.parse()
-    expect(AST.isError(result)).toBe(false)
-
+    expect(isError(result)).toBe(false)
+    
     const nodes = result as Node[]
-
     const structure = new Structure(nodes).generate()
-
+    console.log(structure.structure)
+    console.log(structure.structure.length)
+    
+    
     expect(structure.propositions).toHaveLength(4)
     expect(structure.columns).toBe(4)
     expect(structure.rows).toBe(4)
@@ -27,10 +29,10 @@ describe('StructureGenerate', () => {
   })
 
   it('Testing the generation of a more complex table structure (p ^ ~(q ˅ r))', async () => {
-    const parser = new AST('p ^ ~(q ˅ r)')
+    const parser = new Analyzer('p ^ ~(q ˅ r)')
 
     const result = parser.parse()
-    expect(AST.isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
     const nodes = result as Node[]
 

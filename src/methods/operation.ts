@@ -1,5 +1,5 @@
-import { Method } from '../class/astMethods.js'
-import { OperationValues } from '../types/ast.js'
+import { Method } from '../class/Methods.js'
+import { OperationValues } from '../types/analyzer.js'
 
 new Method({
   name: 'Operation',

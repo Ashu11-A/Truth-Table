@@ -1,4 +1,5 @@
-import { Node } from '../types/ast.js'
+import { ErrorType } from '../lib/error.js'
+import { Node } from '../types/analyzer.js'
 import { MethodProps, MethodRunner } from '../types/method.js'
 
 export class Method<ASType extends Node['type']>{
@@ -9,7 +10,7 @@ export class Method<ASType extends Node['type']>{
     Method.all.push(this)
   }
 
-  static execute ({ ast, index, tokens, type }: MethodRunner & { type: Node['type'] }) {
+  static execute ({ ast, index, tokens, type }: MethodRunner & { type: Node['type'] }): Node | ErrorType {
     return Method.find(type)?.interaction.run({ ast, index, tokens })
   }
 }

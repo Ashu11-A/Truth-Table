@@ -1,5 +1,5 @@
 import { writeFile } from 'fs/promises'
-import { BaseAST, Node, OperationKey, Proposition } from '../types/ast.js'
+import { BaseAST, Node, OperationKey, Proposition } from '../types/analyzer.js'
 import { StructureJson } from '../types/structure.js'
 
 /**
@@ -18,14 +18,16 @@ export class Structure {
    */
   public columns: number = 0
   public rows: number = 0
-  public structure: StructureJson = []
+  public structure: StructureJson[] = []
   public propositions: string[] = []
+  private values: StructureJson[] = []
 
   constructor(public ast: Node[]) {
     this.propositions = this.getPropositions().map((element) => element.value)
     this.columns = this.propositions.length
     // Faz 2 elevado ao numero de colunas
     this.rows = 2 ** this.columns
+    this.generate()
   }
 
   /**
@@ -34,8 +36,6 @@ export class Structure {
    * @returns {Structure} The current instance of the Structure class with parsed values.
    */
   generate(): Structure {
-    const values: StructureJson = []
-
     for (let row = 0; row < this.rows; row++) {
       const rowValues: Record<string, boolean> = {}
       /**
@@ -51,7 +51,7 @@ export class Structure {
 
       // Adiciona valores das proposições
       for (let column = 0; column < this.columns; column++) {
-        values.push({
+        this.addRowValues({
           type: 'Variable',
           element: this.propositions[column],
           value: rowValues[this.propositions[column]],
@@ -63,10 +63,10 @@ export class Structure {
 
       const negatives = this.getPropositions().filter((propositions) => propositions.negatived)
       for (const element of negatives) {
-        const column = values.findIndex((value) => value.element === element.value)
+        const column = this.values.findIndex((value) => value.element === element.value)
         const value = `~${element.value}`
         this.propositions.push(value)
-        values.push({
+        this.addRowValues({
           type: 'VariableNegative',
           element: value,
           value: !rowValues[this.propositions[column]],
@@ -79,7 +79,8 @@ export class Structure {
       // Calcula e adiciona o resultado da expressão lógica
       this.evaluateExpression(this.ast, rowValues).map(({ expression, value }, index) => {
         this.propositions.push(expression)
-        values.push({
+
+        this.addRowValues({
           type: 'Result',
           element: expression,
           value,
@@ -90,10 +91,14 @@ export class Structure {
       })
     }
 
-    this.structure = values
+    this.structure = this.values
     this.propositions = Array.from(new Set(this.propositions)) // Remove duplicatas recorrentes de this.evaluateExpression
     this.columns = this.propositions.length
     return this
+  }
+
+  private addRowValues(options: StructureJson) {
+    this.values.push(options)
   }
 
   /**
@@ -170,8 +175,8 @@ export class Structure {
           const displayName = `(${subResult[0].expression})`
 
           expressions.push(...subResult.map((values) => ({ ...values, expression: displayName })))
-
           input.push(displayName)
+
           results.push(...subResult.map((result) => result.value))
           break
         }
@@ -223,9 +228,9 @@ export class Structure {
   }
 
   /**
-   * Obtém uma lista de proposições únicas a partir de uma árvore de sintaxe abstrata (AST).
+   * Obtém uma lista de proposições únicas a partir de uma árvore de sintaxe abstrata (Analyzer).
    *
-   * @param {Node[]} [ast] - A árvore de sintaxe abstrata a ser processada. Se não fornecida, usa a AST interna.
+   * @param {Node[]} [ast] - A árvore de sintaxe abstrata a ser processada. Se não fornecida, usa a Analyzer interna.
    * @returns {string[]} - Uma lista de proposições únicas.
    */
   getPropositions(ast?: Node[]): (Proposition & BaseAST)[] {

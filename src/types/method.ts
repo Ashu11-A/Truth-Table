@@ -1,9 +1,9 @@
-import { AST } from '../class/ast.js'
+import { Analyzer } from '../class/Analyzer.js'
 import { ErrorType } from '../lib/error.js'
-import { Node, Tokenizer } from './ast.js'
+import { Node, Tokenizer } from './analyzer.js'
 
 export type MethodRunner = {
-  ast: AST,
+  ast: Analyzer,
   tokens: Tokenizer[],
   index: number
 }

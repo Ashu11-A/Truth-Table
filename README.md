@@ -79,7 +79,7 @@ const input = 'p ^ (p v ~q)'
 const parser = new AST(input)
 const ast = parser.parse()
 
-if (AST.isError(ast)) throw new Error(JSON.stringify(ast, null, 2))
+if (isError(ast)) throw new Error(JSON.stringify(ast, null, 2))
 await parser.save('ast.json')
 
 const structure = new Structure(ast).generate()

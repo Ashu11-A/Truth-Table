@@ -4,7 +4,7 @@
  * @export
  * @typedef {StructureJson}
  */
-export type StructureJson = Array<{
+export type StructureJson = {
     /**
      * The variable or element represented in the truth table (e.g., 'p', 'q').
      *
@@ -41,4 +41,4 @@ export type StructureJson = Array<{
      * @type {number}
      */
     row: number
-}>
+}

@@ -1,3 +1,5 @@
+import { Tokenizer, TokenizerContent } from './tokenizer'
+
 export type Position = {
     line: number,
     column: number
@@ -12,12 +14,6 @@ export type BaseAST = {
     loc: SourceLocation
 }
 
-export type Proposition = {
-    type: 'Proposition',
-    value: string
-    negatived: boolean,
-}
-
 export type OperationValues = '¬' | '~' | '∧' | '^' | '∨' | '→' | '↔' | '⊕'
 
 export enum OperationKey {
@@ -30,6 +26,17 @@ export enum OperationKey {
     None = 'None'
 }
 
+// export type Negation = {
+//     type: 'Negation',
+//     value: string
+//     negatived: true
+// }
+
+export type Proposition = {
+    type: 'Proposition',
+    value: string
+    negatived: boolean,
+}
 export interface Operation extends BaseAST {
     key: OperationKey;
     value: string;
@@ -42,9 +49,9 @@ export type SubExpression = {
     body: Node[]
 }
 
-export type Tokenizer = {
-    value: OperationValues | string,
-    loc: SourceLocation
-}
-
 export type Node = (Proposition | Operation | SubExpression) & BaseAST
+
+export type AnalyzerOptions<T extends string | TokenizerContent> = 
+  T extends string
+    ? { input: T; tokenizer?: never }
+    : { input?: never; tokenizer: TokenizerContent }

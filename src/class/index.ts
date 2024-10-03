@@ -1,4 +1,4 @@
-export * from './ast.js'
+export * from './Analyzer.js'
 export * from './structure.js'
 export * from './table.js'
-export * from './astMethods.js'
+export * from './Methods.js'

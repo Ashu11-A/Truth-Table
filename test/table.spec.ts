@@ -1,15 +1,15 @@
 import { jest } from '@jest/globals'
 import { rm, stat } from 'fs/promises'
-import { AST, Node, Structure, Table } from '../src'
+import { Analyzer, isError, Node, Structure, Table } from '../src'
 
 jest.useFakeTimers()
 
 describe('TableGenetate', () => {
   it('Save Table', async () => {
-    const parser = new AST('p ^ q')
+    const parser = new Analyzer('p ^ q')
     const result = parser.parse()
   
-    expect(AST.isError(result)).toBe(false)
+    expect(isError(result)).toBe(false)
 
     const nodes = result as Node[]
     const structure = new Structure(nodes).generate()

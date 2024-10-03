@@ -1,4 +1,4 @@
-import { Method } from '../class/astMethods.js'
+import { Method } from '../class/Methods.js'
 
 new Method({
   name: 'Proposition',
